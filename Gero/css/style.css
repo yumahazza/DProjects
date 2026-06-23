@@ -4,3 +4,106 @@
     box-sizing: border-box;
 }
 
+/* STYLING NAVBAR */
+#navbar{
+    background-color: aqua;
+}
+
+#nav_cont{
+    margin: 0 100px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#nav_logo img{
+    height: 50px;
+}
+
+#nav_menu ul{
+    display: flex;
+    list-style: none;
+    gap: 50px;
+}
+
+#nav_menu ul li{
+    font-size: 1.3em;
+}
+
+/* STYLING HERO */
+#cont_hero{
+    height: 100vh;
+    background-image: url("../assets/image3_hero.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#text_hero{
+    color: white;
+    text-align: center;
+    font-size: 2em;
+}
+
+/* STYLING CATEGORY */
+#category{
+    background-color: beige;
+    height: 20vh;
+}
+
+#cont_ctgr{
+    margin: 0 100px;
+}
+
+#head_ctgr p{
+    font-size: 3em;
+    text-align: center;
+}
+
+#li_ctgr{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+#li_ctgr button{
+    background-color: aqua;
+    padding: 10px;
+    border-radius: 30px;
+    width: 100px;
+    text-align: center;
+}
+
+/* STYLING PRODUCTS */
+#products{
+    background-color: cadetblue;
+
+}
+
+#cont_prod{
+    margin: 0 100px;
+}
+
+#head_prod p{
+    font-size: 3em;
+    text-align: center;
+}
+
+#cont_card{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.card_prod img{
+    height: 100px;
+}
