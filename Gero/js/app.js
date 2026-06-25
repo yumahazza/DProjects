@@ -15,20 +15,16 @@
     }
 
     function loadTheme(){
+        document.documentElement.classList.remove('dark');
         const stored = localStorage.getItem('theme');
-        if(stored === 'light') { applyThemeClass(true); updateToggleUI(true); document.documentElement.classList.remove('prefers-set'); return }
-        if(stored === 'dark') { applyThemeClass(false); updateToggleUI(false); document.documentElement.classList.remove('prefers-set'); return }
-        // no stored preference: mark that we used OS preference fallback
-        document.documentElement.classList.add('prefers-set');
-        const isOsDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyThemeClass(isOsDark);
-        updateToggleUI(isOsDark);
+        if(stored === 'dark') { applyThemeClass(true); updateToggleUI(true); return }
+        if(stored === 'light') { applyThemeClass(false); updateToggleUI(false); return }
+        // no stored preference: default to light theme
+        updateToggleUI(false);
     }
 
     function saveTheme(isDark){
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        // When user explicitly sets theme remove prefers-set marker
-        document.documentElement.classList.remove('prefers-set');
     }
 
     themeToggle?.addEventListener('click', ()=>{
@@ -38,36 +34,49 @@
         updateToggleUI(isDark);
     });
 
+    const productIndex = {};
+
     async function loadProducts(){
+        const basePath = window.location.pathname.includes('/pages/') ? '../' : '';
+        const productsUrl = `${basePath}data/products.json`;
         const container = document.getElementById('cont_card');
-        if(!container) return;
 
         try {
-            const response = await fetch('data/products.json');
+            const response = await fetch(productsUrl);
             if(!response.ok) throw new Error('Unable to fetch products');
             const products = await response.json();
             const formatter = new Intl.NumberFormat('id-ID');
 
-            container.innerHTML = products.map(product => {
-                return `
-                    <article class="card_prod" role="listitem" data-id="${product.id}" data-price="${product.price}">
-                        <img alt="${product.name}" src="${product.image}">
-                        <h3>${product.name}</h3>
-                        <p class="muted">${product.category}</p>
-                        <p class="price" data-value="${product.price}">Rp ${formatter.format(product.price)} / hari</p>
-                        <div class="card-actions">
-                            <button class="btn add-cart">Add to cart</button>
-                        </div>
-                    </article>`;
-            }).join('');
-            wireButtons();
+            products.forEach(product => {
+                productIndex[product.id] = product;
+            });
+
+            if(container){
+                container.innerHTML = products.map(product => {
+                    return `
+                        <article class="card_prod" role="listitem" data-id="${product.id}" data-price="${product.price}">
+                            <img alt="${product.name}" src="${product.image}">
+                            <h3>${product.name}</h3>
+                            <p class="muted">${product.category}</p>
+                            <p class="price" data-value="${product.price}">Rp ${formatter.format(product.price)} / hari</p>
+                            <div class="card-actions">
+                                <button class="btn add-cart">Add to cart</button>
+                            </div>
+                        </article>`;
+                }).join('');
+                wireButtons();
+            }
         } catch (error) {
-            container.innerHTML = '<p class="error">Gagal memuat produk. Silakan refresh halaman.</p>';
+            if(container) container.innerHTML = '<p class="error">Gagal memuat produk. Silakan refresh halaman.</p>';
             console.error(error);
         }
     }
 
-    // Cart
+    function resolveProduct(id){
+        return productIndex[id] || {id, name: id, price: 0};
+    }
+
+    // Cart and product helpers
     function getCart(){
         try{ return JSON.parse(localStorage.getItem('cart')||'[]') }catch(e){ return [] }
     }
@@ -89,21 +98,74 @@
         const items = getCart();
         cartCountEl && (cartCountEl.textContent = items.reduce((s,i)=>s+i.qty,0));
         if(!cartListEl) return;
-        if(items.length === 0) { cartListEl.textContent = 'Keranjang kosong.'; return }
+
+        const messageEl = document.getElementById('cart-message');
+        if(messageEl) messageEl.textContent = '';
+
+        if(items.length === 0) {
+            cartListEl.innerHTML = '<p>Keranjang kosong.</p>';
+            document.getElementById('confirm-rental')?.setAttribute('disabled', '');
+            return;
+        }
+
         let total = 0;
-        const rows = items.map(it=>{
-            const card = document.querySelector(`[data-id="${it.id}"]`);
-            const name = card ? (card.querySelector('h3')?.textContent || it.id) : it.id;
-            const price = card ? parseFloat(card.dataset.price || (card.querySelector('.price')?.dataset?.value)) || 0 : 0;
-            const subtotal = price * it.qty;
+        cartListEl.innerHTML = items.map(item => {
+            const product = resolveProduct(item.id);
+            const subtotal = product.price * item.qty;
             total += subtotal;
-            return {name, qty: it.qty, price, subtotal};
-        });
-        cartListEl.innerHTML = '<ul>' + rows.map(r=>`<li>${r.name} — Rp ${fmt(r.price)} × ${r.qty} = Rp ${fmt(r.subtotal)}</li>`).join('') + '</ul>' +
-            `<div class="cart-total">Total: <strong>Rp ${fmt(total)}</strong></div>`;
+            return `
+                <div class="cart-item" data-id="${item.id}">
+                    <div class="cart-item-details">
+                        <strong>${product.name}</strong>
+                        <div>${item.qty} x Rp ${fmt(product.price)} = Rp ${fmt(subtotal)}</div>
+                    </div>
+                    <div class="cart-controls">
+                        <button type="button" class="cart-control" data-action="decrease" data-id="${item.id}" aria-label="Kurangi jumlah">−</button>
+                        <button type="button" class="cart-control" data-action="increase" data-id="${item.id}" aria-label="Tambah jumlah">+</button>
+                        <button type="button" class="cart-item-remove" data-action="remove" data-id="${item.id}">Hapus</button>
+                    </div>
+                </div>`;
+        }).join('') + `
+            <div class="cart-total">Total: <strong>Rp ${fmt(total)}</strong></div>`;
+
+        document.getElementById('confirm-rental')?.removeAttribute('disabled');
     }
 
-    // Fungsi add-to-cart
+    function handleCartAction(event){
+        const button = event.target.closest('[data-action]');
+        if(!button) return;
+        const action = button.dataset.action;
+        const id = button.dataset.id;
+        if(!id) return;
+
+        if(action === 'increase') updateQuantity(id, 1);
+        if(action === 'decrease') updateQuantity(id, -1);
+        if(action === 'remove') removeItem(id);
+    }
+
+    function updateQuantity(id, delta){
+        const items = getCart();
+        const item = items.find(i=>i.id===id);
+        if(!item) return;
+        item.qty += delta;
+        if(item.qty <= 0) return removeItem(id);
+        setCart(items);
+    }
+
+    function removeItem(id){
+        const items = getCart().filter(i=>i.id !== id);
+        setCart(items);
+    }
+
+    function confirmRental(){
+        const items = getCart();
+        if(items.length === 0) return;
+        localStorage.removeItem('cart');
+        renderCart();
+        const messageEl = document.getElementById('cart-message');
+        if(messageEl) messageEl.textContent = 'Sewa berhasil dikonfirmasi. Terima kasih!';
+    }
+
     function wireButtons(){
         document.querySelectorAll('.add-cart').forEach(btn=>{
         btn.addEventListener('click', ()=>{
@@ -115,7 +177,13 @@
         });
     }
 
+    function wireCartActions(){
+        document.body.addEventListener('click', handleCartAction);
+        document.getElementById('confirm-rental')?.addEventListener('click', confirmRental);
+    }
+
     loadTheme();
     loadProducts();
     renderCart();
+    wireCartActions();
 })();

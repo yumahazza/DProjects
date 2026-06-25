@@ -4,15 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Keranjang - Gero</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/darkmode.css">
-  <script src="js/app.js" defer></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/darkmode.css">
+  <script src="../js/app.js" defer></script>
  </head>
  <body>
   <main class="container">
     <h1>Keranjang</h1>
+    <div id="cart-message" class="cart-message" aria-live="polite"></div>
     <div id="cart-list">Memuat keranjang...</div>
-    <p><a href="index.html">Kembali ke beranda</a></p>
+    <div class="cart-footer">
+      <button id="confirm-rental" class="btn confirm-btn">Konfirmasi Sewa</button>
+    </div>
+    <p><a href="../index.html">Kembali ke beranda</a></p>
   </main>
  </body>
 </html>

@@ -18,9 +18,9 @@
                 </a>
                 <button id="theme-toggle" aria-label="Toggle dark mode">🌓</button>
                 <ul class="nav-list">
-                    <li><a href="#hero">Beranda</a></li>
-                    <li><a href="#history">Riwayat</a></li>
-                    <li><a href="#cart">Keranjang <span id="cart-count" aria-live="polite">0</span></a></li>
+                    <li><a href="index.html">Beranda</a></li>
+                    <li><a href="pages/rental.html">Riwayat</a></li>
+                    <li><a href="pages/cart.html">Keranjang <span id="cart-count" aria-live="polite">0</span></a></li>
                 </ul>
             </div>
         </nav>
@@ -62,7 +62,11 @@
         <section id="cart" class="cart" aria-labelledby="cart-title">
             <div class="container">
                 <h2 id="cart-title">Keranjang</h2>
+                <div id="cart-message" class="cart-message" aria-live="polite"></div>
                 <div id="cart-list">Keranjang kosong.</div>
+                <div class="cart-footer">
+                    <button id="confirm-rental" class="btn confirm-btn">Konfirmasi Sewa</button>
+                </div>
             </div>
         </section>
     </main>

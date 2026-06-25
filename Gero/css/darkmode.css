@@ -1,5 +1,4 @@
-/* Dark theme: set variables only when dark mode is active via class or OS preference */
-/* Variables are applied under `html.dark` so toggling the class updates the theme. */
+/* Dark theme values only when html.dark is present */
 html.dark{
 	--bg: #0b1220;
 	--surface: #0f1724;
@@ -7,22 +6,6 @@ html.dark{
 	--accent: #20c1d6;
 	--accent-600: #17a0ad;
 	--text: #ecf0f6;
-	background: var(--bg);
-	color: var(--text);
-}
-
-/* Respect user's OS preference if no explicit toggle used */
-@media (prefers-color-scheme: dark){
-	html:not(.light):not(.prefers-set){
-		--bg: #0b1220;
-		--surface: #0f1724;
-		--muted: #9aa4b2;
-		--accent: #20c1d6;
-		--accent-600: #17a0ad;
-		--text: #ecf0f6;
-		background: var(--bg);
-		color: var(--text);
-	}
 }
 
 html.dark .site-nav{ background: var(--surface); border-color: rgba(255,255,255,0.04) }
