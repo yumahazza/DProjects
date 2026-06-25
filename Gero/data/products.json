@@ -1,0 +1,6 @@
+[
+  {"id":"p1","name":"Eiger Piranha 2","price":25000,"image":"assets/eigerpiranha2.png","category":"Carrier","available":true},
+  {"id":"p2","name":"Consina Carrier 60L","price":30000,"image":"assets/consinacarrier60L.jpg","category":"Carrier","available":true},
+  {"id":"p3","name":"Sleeping Bag Naturehike","price":20000,"image":"assets/sleepingbag.png","category":"Sleeping","available":true},
+  {"id":"p4","name":"Kompor Portable","price":15000,"image":"assets/komporportabel.jpg","category":"Cooking","available":true}
+]
